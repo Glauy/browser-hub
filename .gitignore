@@ -22,6 +22,7 @@ release/
 # Verification screenshots (scripts/dev-*)
 .screenshots/
 
+
 # Editor
 .vscode/*
 !.vscode/extensions.json
