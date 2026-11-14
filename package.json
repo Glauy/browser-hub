@@ -12,7 +12,8 @@
     "desktop:dev": "cargo run --manifest-path src-tauri/Cargo.toml",
     "desktop:build": "npm run build && cargo build --release --manifest-path src-tauri/Cargo.toml",
     "desktop:bundle": "tauri build",
-    "dist": "npm run desktop:bundle && node scripts/release-collect.cjs"
+    "dist": "npm run desktop:bundle && node scripts/release-collect.cjs",
+    "sync-main": "node scripts/sync-main.cjs"
   },
   "dependencies": {
     "lucide-react": "^0.546.0",
