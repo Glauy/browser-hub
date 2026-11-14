@@ -112,17 +112,10 @@ pub fn minimize(app: &AppHandle) {
     let Some(window) = main_window(app) else {
         return;
     };
-    let minimize_to_tray = app
-        .try_state::<AppState>()
-        .map(|state| state.settings_snapshot().minimize_to_tray)
-        .unwrap_or(false);
-    let result = if minimize_to_tray {
-        window.hide()
-    } else {
-        window.minimize()
-    };
-    if let Err(error) = result {
-        log::warn!("could not minimize BrowserHub window: {error}");
+    // Hide-to-tray whenever the tray is available (always on Windows). This
+    // keeps the taskbar clean: the only visible token is the tray icon.
+    if let Err(error) = window.hide() {
+        log::warn!("could not hide BrowserHub window: {error}");
     }
 }
 

@@ -30,9 +30,9 @@ const params = new URLSearchParams(window.location.search);
 let settings: AppSettings = {
   environmentRootDir: "D:\\BrowserProfiles",
   backupRootDir: "D:\\BrowserProfiles\\backups",
-  closeBehavior: "exit",
+  closeBehavior: "minimize",
   launchOnStartup: false,
-  minimizeToTray: false,
+  minimizeToTray: true,
   setupCompleted: !params.has("onboarding"),
 };
 

@@ -27,16 +27,18 @@ const CLOSE_OPTIONS: Array<{
   icon: typeof LogOut;
 }> = [
   {
-    value: "exit",
-    title: "退出 BrowserHub",
-    description: "关闭主窗口时退出管理器。已启动的 Chrome 会继续运行。",
-    icon: LogOut,
+    value: "minimize",
+    title: "关闭时隐藏到托盘（推荐）",
+    description:
+      "关闭和最小化都会隐藏窗口，任务栏不保留图标；从托盘图标左键单击恢复。已启动的 Chrome 继续运行。",
+    icon: MinusSquare,
   },
   {
-    value: "minimize",
-    title: "最小化到系统托盘",
-    description: "关闭主窗口后隐藏到托盘，可从托盘图标重新打开。",
-    icon: MinusSquare,
+    value: "exit",
+    title: "关闭时退出 BrowserHub",
+    description:
+      "关闭主窗口即退出管理器（任务栏和托盘图标一并消失）。已启动的 Chrome 会继续运行。",
+    icon: LogOut,
   },
 ];
 
@@ -144,21 +146,6 @@ export function ApplicationSettings({
         </div>
 
         <div className="divide-y divide-line rounded-card border border-line bg-panel shadow-panel">
-          <div className="flex items-center justify-between gap-6 px-4 py-3">
-            <div>
-              <p className="text-[12.5px] font-medium text-ink">最小化时隐藏到托盘</p>
-              <p className="mt-0.5 text-[11px] text-ink-muted">
-                点击标题栏最小化按钮时，不显示在任务栏，而是保留在系统托盘。
-              </p>
-            </div>
-            <Switch
-              label="最小化时隐藏到托盘"
-              checked={settings.minimizeToTray}
-              disabled={saving}
-              onCheckedChange={(checked) => onPatch({ minimizeToTray: checked })}
-            />
-          </div>
-
           <div className="flex items-center justify-between gap-6 px-4 py-3">
             <div>
               <p className="text-[12.5px] font-medium text-ink">开机时启动 BrowserHub</p>

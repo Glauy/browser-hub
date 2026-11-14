@@ -96,9 +96,11 @@ impl Default for AppSettings {
         Self {
             environment_root_dir: DEFAULT_ENVIRONMENT_ROOT.to_string(),
             backup_root_dir: None,
-            close_behavior: CloseBehavior::Exit,
+            // Close-to-tray is the desktop-app convention for a manager that
+            // keeps running while Chrome environments are in use.
+            close_behavior: CloseBehavior::Minimize,
             launch_on_startup: false,
-            minimize_to_tray: false,
+            minimize_to_tray: true,
             setup_completed: false,
         }
     }

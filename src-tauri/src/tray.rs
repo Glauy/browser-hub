@@ -8,7 +8,7 @@ pub fn setup(app: &AppHandle) -> tauri::Result<()> {
     let menu = Menu::with_items(app, &[&open, &exit])?;
 
     let mut builder = TrayIconBuilder::with_id("browserhub-tray")
-        .tooltip("BrowserHub")
+        .tooltip("BrowserHub - Chrome 环境管理器\n左键：显示窗口\n右键：打开/退出")
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| match event.id().as_ref() {
@@ -17,6 +17,9 @@ pub fn setup(app: &AppHandle) -> tauri::Result<()> {
             _ => {}
         })
         .on_tray_icon_event(|tray, event| match event {
+            // Left click / double click always restores the window. This is
+            // the primary interaction since closing/minimizing hides the
+            // window to the tray (no taskbar entry while hidden).
             TrayIconEvent::Click {
                 button: MouseButton::Left,
                 button_state: MouseButtonState::Up,
