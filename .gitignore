@@ -1,0 +1,29 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+npm-install*.log
+
+# Dependencies
+node_modules
+
+# Build output
+dist
+dist-ssr
+*.local
+
+# Tauri
+src-tauri/target
+src-tauri/gen
+
+# 发布产物收集（scripts/release-collect.js）
+release/
+
+# Verification screenshots (scripts/dev-*)
+.screenshots/
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store

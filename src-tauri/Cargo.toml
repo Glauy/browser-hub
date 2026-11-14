@@ -1,0 +1,49 @@
+[package]
+name = "browserhub"
+version = "0.1.0"
+description = "BrowserHub - Chrome browser environment manager"
+authors = ["BrowserHub"]
+edition = "2021"
+rust-version = "1.77.2"
+
+[lib]
+name = "browserhub_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.7.4", features = [] }
+
+[dependencies]
+tauri = { version = "2.12.5", features = ["tray-icon", "image-png"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+libsqlite3-sys = { version = "0.37.0", features = ["bundled"] }
+uuid = { version = "1.29.0", features = ["v4"] }
+chrono = { version = "0.4.45", features = ["serde"] }
+log = { version = "0.4.35", features = ["std"] }
+walkdir = "2.5.0"
+dunce = "1.0.5"
+rfd = { version = "0.16.0", default-features = false, features = ["common-controls-v6"] }
+winreg = "0.56.0"
+
+[target.'cfg(windows)'.dependencies.windows-sys]
+version = "0.61.2"
+features = [
+  "Win32_Foundation",
+  "Win32_Storage_FileSystem",
+  "Win32_System_Diagnostics_ToolHelp",
+  "Win32_System_LibraryLoader",
+  "Win32_System_ProcessStatus",
+  "Win32_System_Registry",
+  "Win32_System_Threading",
+  "Win32_Security",
+  "Win32_UI_Shell",
+  "Win32_UI_WindowsAndMessaging",
+]
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true

@@ -1,0 +1,291 @@
+@import "tailwindcss";
+
+/* -------------------------------------------------------------------------- */
+/* Design tokens                                                              */
+/* -------------------------------------------------------------------------- */
+
+:root {
+  --bh-font-sans:
+    "Segoe UI Variable Text", "Segoe UI", "Microsoft YaHei UI", "PingFang SC",
+    "Hiragino Sans GB", system-ui, sans-serif;
+  --bh-font-mono:
+    "Cascadia Mono", "Cascadia Code", "Consolas", "SFMono-Regular", monospace;
+
+  --bh-canvas: #f1f0ed;
+  --bh-surface: #f7f6f3;
+  --bh-panel: #ffffff;
+  --bh-panel-muted: #f7f6f3;
+  --bh-panel-hover: #faf9f7;
+  --bh-line: #e4e1da;
+  --bh-line-strong: #d3cfc6;
+
+  --bh-ink: #1c1e1b;
+  --bh-ink-muted: #62655e;
+  --bh-ink-subtle: #92958d;
+  --bh-ink-inverse: #f8f7f3;
+
+  --bh-accent: #0f6b5b;
+  --bh-accent-strong: #0a5649;
+  --bh-accent-soft: #e6f0ec;
+  --bh-accent-ink: #0a5649;
+  --bh-accent-contrast: #ffffff;
+
+  --bh-danger: #b23a31;
+  --bh-danger-strong: #952c25;
+  --bh-danger-soft: #fbecea;
+  --bh-success: #197348;
+  --bh-success-soft: #e8f3ed;
+  --bh-warning: #946314;
+  --bh-warning-soft: #f7f0df;
+  --bh-info: #2f5f8a;
+
+  --bh-shadow-panel: 0 1px 2px rgb(28 30 27 / 0.04);
+  --bh-shadow-float:
+    0 24px 64px -24px rgb(20 24 20 / 0.4), 0 2px 8px rgb(20 24 20 / 0.08);
+  --bh-shadow-menu:
+    0 16px 40px -16px rgb(20 24 20 / 0.32), 0 2px 6px rgb(20 24 20 / 0.06);
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bh-canvas: #121412;
+    --bh-surface: #161816;
+    --bh-panel: #1b1e1b;
+    --bh-panel-muted: #202420;
+    --bh-panel-hover: #202420;
+    --bh-line: #2b2f2b;
+    --bh-line-strong: #3b403b;
+
+    --bh-ink: #e8eae5;
+    --bh-ink-muted: #a1a69d;
+    --bh-ink-subtle: #797e76;
+    --bh-ink-inverse: #161816;
+
+    --bh-accent: #479b89;
+    --bh-accent-strong: #62b4a1;
+    --bh-accent-soft: #1d302b;
+    --bh-accent-ink: #7cc7b6;
+    --bh-accent-contrast: #07120f;
+
+    --bh-danger: #d06a60;
+    --bh-danger-strong: #de7e74;
+    --bh-danger-soft: #35201e;
+    --bh-success: #5ab184;
+    --bh-success-soft: #1a2d24;
+    --bh-warning: #c9a25c;
+    --bh-warning-soft: #302818;
+    --bh-info: #7ba6cc;
+
+    --bh-shadow-panel: 0 1px 2px rgb(0 0 0 / 0.2);
+    --bh-shadow-float:
+      0 24px 64px -24px rgb(0 0 0 / 0.7), 0 2px 8px rgb(0 0 0 / 0.4);
+    --bh-shadow-menu:
+      0 16px 40px -16px rgb(0 0 0 / 0.6), 0 2px 6px rgb(0 0 0 / 0.3);
+
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --font-sans: var(--bh-font-sans);
+  --font-mono: var(--bh-font-mono);
+
+  --color-canvas: var(--bh-canvas);
+  --color-surface: var(--bh-surface);
+  --color-panel: var(--bh-panel);
+  --color-panel-muted: var(--bh-panel-muted);
+  --color-panel-hover: var(--bh-panel-hover);
+  --color-line: var(--bh-line);
+  --color-line-strong: var(--bh-line-strong);
+
+  --color-ink: var(--bh-ink);
+  --color-ink-muted: var(--bh-ink-muted);
+  --color-ink-subtle: var(--bh-ink-subtle);
+  --color-ink-inverse: var(--bh-ink-inverse);
+
+  --color-accent: var(--bh-accent);
+  --color-accent-strong: var(--bh-accent-strong);
+  --color-accent-soft: var(--bh-accent-soft);
+  --color-accent-ink: var(--bh-accent-ink);
+  --color-accent-contrast: var(--bh-accent-contrast);
+
+  --color-danger: var(--bh-danger);
+  --color-danger-strong: var(--bh-danger-strong);
+  --color-danger-soft: var(--bh-danger-soft);
+  --color-success: var(--bh-success);
+  --color-success-soft: var(--bh-success-soft);
+  --color-warning: var(--bh-warning);
+  --color-warning-soft: var(--bh-warning-soft);
+  --color-info: var(--bh-info);
+
+  --radius-card: 10px;
+  --radius-window: 14px;
+
+  --shadow-panel: var(--bh-shadow-panel);
+  --shadow-float: var(--bh-shadow-float);
+  --shadow-menu: var(--bh-shadow-menu);
+
+  --animate-overlay-in: overlay-in 140ms ease-out;
+  --animate-dialog-in: dialog-in 170ms cubic-bezier(0.2, 0.8, 0.3, 1);
+  --animate-toast-in: toast-in 200ms cubic-bezier(0.2, 0.8, 0.3, 1);
+  --animate-fade-in: fade-in 160ms ease-out;
+
+  @keyframes overlay-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes dialog-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Base                                                                      */
+/* -------------------------------------------------------------------------- */
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: var(--bh-canvas);
+    color: var(--bh-ink);
+    font-family: var(--bh-font-sans);
+    font-size: 13px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: default;
+  }
+
+  input,
+  textarea,
+  select,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  input,
+  textarea {
+    user-select: text;
+    -webkit-user-select: text;
+  }
+
+  button {
+    cursor: default;
+  }
+
+  button:disabled {
+    cursor: default;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  :focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--bh-accent) 65%, transparent);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--bh-accent) 22%, transparent);
+  }
+
+  ::-webkit-scrollbar {
+    width: 11px;
+    height: 11px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background-clip: content-box;
+    background-color: color-mix(in srgb, var(--bh-ink-subtle) 35%, transparent);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in srgb, var(--bh-ink-subtle) 60%, transparent);
+  }
+
+  dialog {
+    max-width: none;
+    max-height: none;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    overflow: visible;
+  }
+
+  dialog::backdrop {
+    background: rgb(18 21 18 / 0.44);
+    backdrop-filter: blur(2px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@utility select-text {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
