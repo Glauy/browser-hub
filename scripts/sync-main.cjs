@@ -1,20 +1,16 @@
 #!/usr/bin/env node
 /**
- * sync-main: internal -> main fast-forward, then strip docs/ on main so the
- * public branch never carries the internal notes.
+ * sync-main: internal -> main fast-forward, then prepare main for publishing:
+ *   - strip docs/ (internal notes never reach the public branch)
+ *   - strip vibe coding.md (private spec)
+ *   - swap README.md for README.public.md (product-page style, no internal links)
  *
- * Usage: npm run sync-main          (merge + strip, no push)
- *        npm run sync-main -- --push (merge + strip + push origin main)
- *
- * Flow:
- *   1. require clean working tree
- *   2. fast-forward main to internal
- *   3. on main: git rm -r --cached docs/  (files stay on disk? no - on main
- *      they are removed from the working tree too; internal keeps them)
- *   4. commit the removal on main
- *   5. back to internal
+ * Usage: npm run sync-main          (merge + prepare, no push)
+ *        npm run sync-main -- --push (merge + prepare + push origin main)
  */
 const { execSync } = require("child_process");
+const fs = require("fs");
+const path = require("path");
 
 function git(args, opts = {}) {
   return execSync(`git ${args}`, {
@@ -31,6 +27,13 @@ function assertCleanTree() {
   }
 }
 
+const root = path.resolve(__dirname, "..");
+const publicReadme = path.join(root, "README.public.md");
+if (!fs.existsSync(publicReadme)) {
+  console.error("README.public.md not found; cannot prepare public branch.");
+  process.exit(1);
+}
+
 const shouldPush = process.argv.includes("--push");
 
 assertCleanTree();
@@ -45,14 +48,28 @@ if (current !== "internal") {
 git("checkout main");
 git("merge --ff-only internal");
 
-// 2. strip docs/ from main's history tip (files remain tracked on internal)
-git("rm -r -q --cached docs");
-git('commit -m "chore: strip internal docs for public branch"');
+// 2. strip internal-only content
+const strip = ["docs", "vibe coding.md"];
+for (const item of strip) {
+  const tracked = git(`ls-files "${item}"`, { quiet: true }).trim();
+  if (tracked) {
+    git(`rm -r -q --cached "${item}"`);
+  }
+  const fsPath = path.join(root, item);
+  if (fs.existsSync(fsPath)) {
+    fs.rmSync(fsPath, { recursive: true, force: true });
+  }
+}
 
-// 3. back to internal
+// 3. swap README for the public one
+fs.copyFileSync(publicReadme, path.join(root, "README.md"));
+git("add README.md");
+git('commit -m "chore: prepare public README (strip internal docs)"', { quiet: true });
+
+// 4. back to internal (restores docs/ and internal README automatically)
 git("checkout internal");
 
-console.log("\nmain is ready: docs stripped, ready to push.");
+console.log("\nmain is ready: internal docs stripped, public README in place.");
 if (shouldPush) {
   git("push -u origin main");
   console.log("pushed origin main.");

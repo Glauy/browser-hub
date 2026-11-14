@@ -5,10 +5,16 @@
 
 ## 分支与发布
 
-- `internal`（默认工作分支）：包含 `docs/`（心路历程、ADR、验证记录），**永不 push**。
-- `main`：公开分支，**不含 docs/**，推送到远端。
-- 发布流程：`npm run sync-main`（internal → main 快进合并并移除 docs → push 由你手动确认后执行）。
-- 提交照常在 internal 上做；合并是快进式的，不会产生额外合并提交。
+- `internal`（默认工作分支）：包含 `docs/`（心路历程、ADR、验证记录）与内部
+  README，**永不 push**。
+- `main`：公开分支，由 sync 脚本生成——**不含 docs/ 与 vibe coding.md**，
+  README 替换为 `README.public.md`（产品页风格）。
+- 发布流程：`npm run sync-main`（合并 + 裁剪，不推送）或
+  `npm run sync-main -- --push`（合并 + 裁剪 + 推送）。
+- `README.public.md`（internal 分支维护）是对外 README 的源头；改动它后重新
+  sync 即生效。
+- 提交照常在 internal 上做；合并是快进式的，main 上额外一个"prepare public
+  README"提交。
 
 ## 语言选择规范
 
