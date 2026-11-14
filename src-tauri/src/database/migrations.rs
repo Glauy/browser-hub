@@ -58,7 +58,16 @@ CREATE INDEX IF NOT EXISTS idx_backups_environment
     ON backups(environment_id);
 "#;
 
-const MIGRATIONS: &[&str] = &[VERSION_1];
+const VERSION_2: &str = r#"
+-- Default-profile flag: the environment that the plain Chrome shortcut
+-- (no --user-data-dir) resolves to via the system junction takeover.
+ALTER TABLE environments ADD COLUMN is_default_profile INTEGER NOT NULL DEFAULT 0;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_environments_default_profile
+    ON environments(is_default_profile) WHERE is_default_profile = 1;
+"#;
+
+const MIGRATIONS: &[&str] = &[VERSION_1, VERSION_2];
 
 pub fn run(database: &mut Database) -> AppResult<()> {
     let current = database

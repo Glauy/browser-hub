@@ -33,7 +33,6 @@ cd src-tauri; cargo check --offline
 见 [scripts/README.md](../scripts/README.md)：mock 截图、桌面窗口捕获（点击/输入/截图）。
 
 ## 打包安装器（NSIS）
-
 - ✅ **已完成并实测**。`npm run dist`（= `tauri build` + 产物收集）一次性产出：
   - `release/v<版本>/BrowserHub_<版本>_x64-setup.exe` — 安装包（约 1.9 MiB，currentUser 模式，含卸载器）
   - `release/v<版本>/BrowserHub_<版本>_x64-portable.exe` — 便携单文件（即 release exe 改名）

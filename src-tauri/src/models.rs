@@ -162,6 +162,8 @@ pub struct Environment {
     pub updated_at: String,
     pub last_launched_at: Option<String>,
     pub last_status: EnvironmentStatus,
+    /// The environment the plain Chrome shortcut (system junction) resolves to.
+    pub is_default_profile: bool,
 }
 
 /// Database-only view of an environment. Tracking fields power process

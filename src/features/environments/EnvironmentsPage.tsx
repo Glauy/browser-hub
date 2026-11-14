@@ -9,6 +9,7 @@ import { useToast } from "@/components/ui/Toast";
 import { copyText } from "@/lib/clipboard";
 import { call, getErrorMessage } from "@/lib/ipc";
 import { useEnvironmentStats } from "@/features/environments/hooks/useEnvironmentStats";
+import { useSystemDefaultRow } from "./hooks/useSystemDefaultRow";
 import type { EnvironmentSort } from "@/lib/constants";
 import type { Backup, BackupEnvironmentInput } from "@/types/backup";
 import type { BrowserConfig } from "@/types/browser";
@@ -89,6 +90,7 @@ export function EnvironmentsPage({
 }: EnvironmentsPageProps) {
   const { toast } = useToast();
   const stats = useEnvironmentStats(environments);
+  const systemDefault = useSystemDefaultRow();
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<EnvironmentSort>("recent");
   const [launchingId, setLaunchingId] = useState<string | null>(null);
@@ -310,6 +312,20 @@ export function EnvironmentsPage({
               stats={stats.stats}
               loadingIds={stats.loadingIds}
               launchingId={launchingId}
+              systemDefaultRow={systemDefault.row}
+              systemDefaultLoading={systemDefault.loading}
+              systemDefaultLaunching={systemDefault.launching}
+              onLaunchSystemDefault={() => {
+                void systemDefault.launch().catch((cause) => {
+                  toast({
+                    title: "无法启动默认 Chrome",
+                    description: String(cause?.message ?? cause),
+                    variant: "error",
+                  });
+                });
+              }}
+              onRefreshSystemDefault={() => void systemDefault.refresh()}
+              onOpenSettings={onOpenSettings}
               onLaunch={(environment) => void handleLaunch(environment)}
               onEdit={setEditTarget}
               onOpenDirectory={(environment) => void handleOpenDirectory(environment)}

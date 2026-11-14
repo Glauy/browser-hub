@@ -28,6 +28,7 @@ interface SettingsPageProps {
   appVersion: string;
   environmentCount: number;
   backupCount: number;
+  onEnvironmentsChanged: () => void;
   onSettingsUpdated: (settings: AppSettings) => void;
   onBootstrapReload: () => Promise<void>;
   onNavigate: (view: AppView) => void;
@@ -54,6 +55,7 @@ export function SettingsPage({
   appVersion,
   environmentCount,
   backupCount,
+  onEnvironmentsChanged,
   onSettingsUpdated,
   onBootstrapReload,
   onNavigate,
@@ -200,6 +202,7 @@ export function SettingsPage({
                 appDataDir={appDataDir}
                 installDir={installDir}
                 appVersion={appVersion}
+                onEnvironmentsChanged={onEnvironmentsChanged}
                 onPatch={patchSettings}
               />
             ) : null}

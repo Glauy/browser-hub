@@ -61,7 +61,13 @@ export function EnvironmentRow({
   const launchBlocked = running || unknown || launching;
 
   return (
-    <tr className="group border-b border-line/70 transition-colors last:border-b-0 hover:bg-panel-hover">
+    <tr
+      className={
+        environment.isDefaultProfile
+          ? "group border-b border-line/70 bg-accent-soft/25 transition-colors last:border-b-0 hover:bg-panel-hover"
+          : "group border-b border-line/70 transition-colors last:border-b-0 hover:bg-panel-hover"
+      }
+    >
       <td className="px-3 py-2.5">
         <div className="flex min-w-0 items-center gap-2.5">
           <EnvironmentAvatar
@@ -74,6 +80,11 @@ export function EnvironmentRow({
               <span className="truncate text-[12.5px] font-medium text-ink">
                 {environment.name}
               </span>
+              {environment.isDefaultProfile ? (
+                <Badge tone="accent" className="shrink-0">
+                  ★ 默认
+                </Badge>
+              ) : null}
               {environment.sourceType === "imported" ? (
                 <Badge tone="neutral" className="shrink-0">
                   外部

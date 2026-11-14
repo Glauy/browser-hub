@@ -137,6 +137,10 @@ export function App() {
           appVersion={data.appVersion}
           environmentCount={environmentCount}
           backupCount={backupCount}
+          onEnvironmentsChanged={() => {
+            void environments.reload();
+            void environments.refreshStatuses();
+          }}
           onSettingsUpdated={bootstrap.updateSettings}
           onBootstrapReload={bootstrap.reload}
           onNavigate={setView}

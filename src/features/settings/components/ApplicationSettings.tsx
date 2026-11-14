@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/Badge";
 import { Check, FolderOpen, LogOut, MinusSquare } from "lucide-react";
+import { SystemDefaultCard } from "./SystemDefaultCard";
 import { IconButton } from "@/components/ui/IconButton";
 import { Notice } from "@/components/ui/Notice";
 import { PathDisplay } from "@/components/ui/PathDisplay";
@@ -15,6 +16,7 @@ interface ApplicationSettingsProps {
   appDataDir: string;
   installDir: string | null;
   appVersion: string;
+  onEnvironmentsChanged: () => void;
   onPatch: (patch: Partial<AppSettings>) => void;
 }
 
@@ -44,6 +46,7 @@ export function ApplicationSettings({
   appDataDir,
   installDir,
   appVersion,
+  onEnvironmentsChanged,
   onPatch,
 }: ApplicationSettingsProps) {
   const { toast } = useToast();
@@ -77,6 +80,8 @@ export function ApplicationSettings({
 
   return (
     <div className="space-y-6">
+      <SystemDefaultCard onChanged={onEnvironmentsChanged} />
+
       <section>
         <div className="mb-2">
           <h2 className="text-[14px] font-semibold text-ink">关闭窗口时</h2>

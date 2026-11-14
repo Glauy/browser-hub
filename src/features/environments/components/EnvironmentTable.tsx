@@ -1,6 +1,7 @@
 import type { BrowserConfig } from "@/types/browser";
-import type { Environment, EnvironmentStats } from "@/types/environment";
+import type { Environment, EnvironmentStats, SystemDefaultRow } from "@/types/environment";
 import { EnvironmentRow } from "./EnvironmentRow";
+import { SystemDefaultRow as SystemDefaultRowComponent } from "./SystemDefaultRow";
 
 interface EnvironmentTableProps {
   environments: Environment[];
@@ -8,6 +9,12 @@ interface EnvironmentTableProps {
   stats: Record<string, EnvironmentStats>;
   loadingIds: string[];
   launchingId: string | null;
+  systemDefaultRow: SystemDefaultRow | null;
+  systemDefaultLoading: boolean;
+  systemDefaultLaunching: boolean;
+  onLaunchSystemDefault: () => void;
+  onRefreshSystemDefault: () => void;
+  onOpenSettings: () => void;
   onLaunch: (environment: Environment) => void;
   onEdit: (environment: Environment) => void;
   onOpenDirectory: (environment: Environment) => void;
@@ -24,6 +31,12 @@ export function EnvironmentTable({
   stats,
   loadingIds,
   launchingId,
+  systemDefaultRow,
+  systemDefaultLoading,
+  systemDefaultLaunching,
+  onLaunchSystemDefault,
+  onRefreshSystemDefault,
+  onOpenSettings,
   onLaunch,
   onEdit,
   onOpenDirectory,
@@ -69,6 +82,40 @@ export function EnvironmentTable({
           </tr>
         </thead>
         <tbody>
+          <SystemDefaultRowComponent
+            row={systemDefaultRow}
+            loading={systemDefaultLoading}
+            launching={systemDefaultLaunching}
+            browser={browsers.find((b) => b.isDefault) ?? browsers[0]}
+            measuredAt={systemDefaultRow ? undefined : undefined}
+            onLaunch={onLaunchSystemDefault}
+            onOpenDirectory={() => {
+              if (systemDefaultRow) {
+                onOpenDirectory({
+                  id: "__system_default__",
+                  name: "系统默认 Chrome",
+                  description: null,
+                  userDataDir: systemDefaultRow.userDataDir,
+                  sourceType: "managed",
+                  browserConfigId: browsers[0]?.id ?? "",
+                  color: null,
+                  icon: null,
+                  createdAt: "",
+                  updatedAt: "",
+                  lastLaunchedAt: null,
+                  lastStatus: systemDefaultRow.status,
+                  isDefaultProfile: true,
+                });
+              }
+            }}
+            onCopyPath={() => {
+              if (systemDefaultRow) {
+                void navigator.clipboard.writeText(systemDefaultRow.userDataDir);
+              }
+            }}
+            onRefreshStatuses={onRefreshSystemDefault}
+            onOpenSettings={onOpenSettings}
+          />
           {environments.map((environment) => (
             <EnvironmentRow
               key={environment.id}

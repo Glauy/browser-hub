@@ -62,6 +62,7 @@ let environments: Environment[] = [
     updatedAt: minutesAgo(60 * 24 * 24),
     lastLaunchedAt: minutesAgo(26),
     lastStatus: "running",
+    isDefaultProfile: false,
   },
   {
     id: "env_7d29b5",
@@ -76,6 +77,7 @@ let environments: Environment[] = [
     updatedAt: minutesAgo(60 * 24 * 18),
     lastLaunchedAt: minutesAgo(60 * 26),
     lastStatus: "stopped",
+    isDefaultProfile: true,
   },
   {
     id: "env_c51e83",
@@ -90,6 +92,7 @@ let environments: Environment[] = [
     updatedAt: minutesAgo(60 * 24 * 9),
     lastLaunchedAt: minutesAgo(60 * 24 * 3),
     lastStatus: "stopped",
+    isDefaultProfile: false,
   },
   {
     id: "env_2b7f04",
@@ -104,6 +107,7 @@ let environments: Environment[] = [
     updatedAt: minutesAgo(60 * 24 * 4),
     lastLaunchedAt: null,
     lastStatus: "unknown",
+    isDefaultProfile: false,
   },
 ];
 
@@ -364,6 +368,7 @@ export async function mockInvoke<T>(
         updatedAt: now(),
         lastLaunchedAt: null,
         lastStatus: "stopped",
+        isDefaultProfile: false,
       };
       environments = [environment, ...environments];
       return ok(environment) as ApiResult<T>;
@@ -395,6 +400,7 @@ export async function mockInvoke<T>(
         updatedAt: now(),
         lastLaunchedAt: null,
         lastStatus: "stopped",
+        isDefaultProfile: false,
       };
       environments = [environment, ...environments];
       return ok(environment) as ApiResult<T>;

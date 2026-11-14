@@ -356,6 +356,7 @@ pub fn create_environment(
             updated_at: timestamp,
             last_launched_at: None,
             last_status: EnvironmentStatus::Stopped,
+            is_default_profile: false,
         },
         last_pid: None,
         last_pid_started_at: None,
@@ -447,6 +448,7 @@ pub fn import_environment(
             updated_at: timestamp,
             last_launched_at: None,
             last_status: EnvironmentStatus::Unknown,
+            is_default_profile: false,
         },
         last_pid: None,
         last_pid_started_at: None,
@@ -485,6 +487,9 @@ pub fn update_environment(
     })
 }
 
+/// Marks an environment as the "default profile" — the one the plain Chrome
+/// shortcut resolves to via the system junction. Pure metadata; use
+/// `system_default::take_over` to actually repoint the junction.
 pub fn remove_environment(state: &AppState, environment_id: &str) -> AppResult<()> {
     let record = state.with_database(|database| environments_repo::find(database, environment_id))?;
     let status = evaluate_with_scan(&record);

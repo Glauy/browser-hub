@@ -11,7 +11,7 @@ use crate::services::app_paths::AppPaths;
 use crate::services::logging;
 use crate::services::platform;
 use crate::state::AppState;
-use tauri::{Manager, RunEvent, WebviewUrl, WebviewWindowBuilder};
+use tauri::{Manager, RunEvent, WebviewWindowBuilder};
 
 fn initialize(app: &tauri::AppHandle) -> Result<(), Box<dyn std::error::Error>> {
     create_main_window(app)?;
@@ -121,6 +121,12 @@ pub fn run() {
             commands::backups::list_backups,
             commands::backups::restore_environment,
             commands::backups::delete_backup,
+            commands::system_default::get_system_default_state,
+            commands::system_default::get_system_default_row,
+            commands::system_default::launch_system_default_chrome,
+            commands::system_default::take_over_system_default,
+            commands::system_default::sync_system_default_profile,
+            commands::system_default::restore_system_default,
             commands::window::window_minimize,
             commands::window::window_toggle_maximize,
             commands::window::window_is_maximized,

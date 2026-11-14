@@ -15,6 +15,35 @@ export interface Environment {
   updatedAt: string;
   lastLaunchedAt: string | null;
   lastStatus: EnvironmentStatus;
+  /** The environment the plain Chrome shortcut resolves to (system junction). */
+  isDefaultProfile: boolean;
+}
+
+export interface SystemDefaultState {
+  exists: boolean;
+  /** User Data is a junction pointing at env_default (managed). */
+  isManaged: boolean;
+  /** The junction target (raw). */
+  linkTarget: string | null;
+  /** True when User Data is a plain directory (not yet managed). */
+  isOriginalRealDir: boolean;
+  /** Where the original Chrome data was saved during takeover. */
+  originalBackupPath: string | null;
+  /** Does the managed env_default directory exist? */
+  defaultProfileDirExists: boolean;
+  /** Is a plain (no-args) Chrome currently running against User Data? */
+  defaultChromeRunning: boolean;
+}
+
+/** Special "系统默认 Chrome" entry rendered at the top of the env list. */
+export interface SystemDefaultRow {
+  managed: boolean;
+  userDataDir: string;
+  status: EnvironmentStatus;
+  sizeBytes: number;
+  fileCount: number;
+  defaultChromeRunning: boolean;
+  originalBackupPath: string | null;
 }
 
 export interface EnvironmentStatusInfo {

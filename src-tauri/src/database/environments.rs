@@ -1,6 +1,6 @@
 use super::{
-    db_error, duplicate_error, row_i64_optional, row_optional_text, row_text, row_u32, Database,
-    SqlValue,
+    db_error, duplicate_error, row_i64, row_i64_optional, row_optional_text, row_text, row_u32,
+    Database, SqlValue,
 };
 use crate::errors::{AppError, AppResult};
 use crate::models::{
@@ -9,7 +9,7 @@ use crate::models::{
 
 const COLUMNS: &str = "id, name, description, user_data_dir, source_type, browser_config_id, \
      color, icon, created_at, updated_at, last_launched_at, last_status, last_pid, \
-     last_pid_started_at";
+     last_pid_started_at, is_default_profile";
 
 fn map_row(row: &[SqlValue]) -> EnvironmentRecord {
     EnvironmentRecord {
@@ -26,6 +26,7 @@ fn map_row(row: &[SqlValue]) -> EnvironmentRecord {
             updated_at: row_text(row, 9),
             last_launched_at: row_optional_text(row, 10),
             last_status: EnvironmentStatus::from_db(&row_text(row, 11)),
+            is_default_profile: row_i64(row, 14) != 0,
         },
         last_pid: row_u32(row, 12),
         last_pid_started_at: row_i64_optional(row, 13),
@@ -107,7 +108,7 @@ pub fn count_for_browser(database: &mut Database, browser_config_id: &str) -> Ap
 pub fn insert(database: &mut Database, record: &EnvironmentRecord) -> AppResult<()> {
     let environment = &record.environment;
     let sql = format!(
-        "INSERT INTO environments ({COLUMNS}) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)"
+        "INSERT INTO environments ({COLUMNS}) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15)"
     );
     database
         .execute(
@@ -127,6 +128,7 @@ pub fn insert(database: &mut Database, record: &EnvironmentRecord) -> AppResult<
                 SqlValue::from(environment.last_status.as_str()),
                 SqlValue::from(record.last_pid.map(|pid| pid as i64)),
                 SqlValue::from(record.last_pid_started_at),
+                SqlValue::from(if environment.is_default_profile { 1_i64 } else { 0_i64 }),
             ],
         )
         .map_err(|error| duplicate_error("该目录已经在一个浏览器环境中使用。", error))?;
@@ -163,8 +165,55 @@ pub fn update_metadata(
     Ok(find(database, id)?.environment)
 }
 
-pub fn update_status(
-    database: &mut Database,
+pub fn find_default_profile(database: &mut Database) -> AppResult<Option<EnvironmentRecord>> {
+    let sql = format!(
+        "SELECT {COLUMNS} FROM environments WHERE is_default_profile = 1 LIMIT 1"
+    );
+    Ok(database
+        .query_one(&sql, &[])
+        .map_err(|error| db_error("无法读取默认环境", error))?
+        .as_deref()
+        .map(map_row))
+}
+
+/// Atomically moves the single default-profile flag to `id`.
+pub fn set_default_profile(database: &mut Database, id: &str) -> AppResult<()> {
+    database.with_transaction(|transaction| {
+        transaction
+            .execute(
+                "UPDATE environments SET is_default_profile = 0 WHERE is_default_profile = 1",
+                &[],
+            )
+            .map_err(|error| db_error("无法更新默认环境标记", error))?;
+        let changed = transaction
+            .execute(
+                "UPDATE environments
+                 SET is_default_profile = 1, updated_at = ?2
+                 WHERE id = ?1",
+                &[SqlValue::from(id), SqlValue::from(crate::models::now_iso())],
+            )
+            .map_err(|error| db_error("无法更新默认环境标记", error))?;
+        if changed == 0 {
+            return Err(AppError::new(
+                "ENVIRONMENT_NOT_FOUND",
+                "环境不存在或已被移除。",
+            ));
+        }
+        Ok(())
+    })
+}
+
+pub fn clear_default_profile(database: &mut Database) -> AppResult<()> {
+    database
+        .execute(
+            "UPDATE environments SET is_default_profile = 0 WHERE is_default_profile = 1",
+            &[],
+        )
+        .map_err(|error| db_error("无法清除默认环境标记", error))?;
+    Ok(())
+}
+
+pub fn update_status(    database: &mut Database,
     id: &str,
     status: EnvironmentStatus,
     pid: Option<u32>,
