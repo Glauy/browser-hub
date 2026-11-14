@@ -9,12 +9,23 @@
 | 日志 | `%LOCALAPPDATA%\forga.space\BrowserHub\logs\`（按天，保留 7 天，仅本地） |
 | 窗口状态 | `%LOCALAPPDATA%\forga.space\BrowserHub\window-state.json` |
 | WebView2 缓存 | `%LOCALAPPDATA%\forga.space\BrowserHub\webview\EBWebView`（引擎缓存，可重建；见 ADR-0002） |
+| 系统默认 Chrome 数据 | `D:\BrowserProfiles\env_default`（junction 托管，见 user-data-forms.md） |
 | 环境根目录 | 默认 `D:\BrowserProfiles`（可改，绝不硬编码依赖） |
 | 备份目录 | 默认 `<环境根目录>\backups`（可改） |
 
 > 产品根唯一原则：BrowserHub 在 `%LOCALAPPDATA%` 下只占 `forga.space\BrowserHub` 一个目录（程序在
 > `%LOCALAPPDATA%\Programs\BrowserHub`，属安装器管理，见 ADR-0001/0002）。旧版遗留目录
 > （`%LOCALAPPDATA%\BrowserHub`、`%LOCALAPPDATA%\com.browserhub.desktop`）由启动迁移和卸载钩子兜底清理。
+
+## 两种用户数据形态（详见 user-data-forms.md）
+
+| 形态 | 目录 | 入口 |
+| --- | --- | --- |
+| 系统默认 Chrome | `env_default`（junction 托管） | 双击图标 / 其他程序链接 / 列表"启动" |
+| BrowserHub 环境 | `env_<id>`（`--user-data-dir` 直连） | 仅 BrowserHub 环境列表 |
+
+两者可同时运行（Chrome 多实例引擎），互不影响。`env_default` 不参与环境切换、
+不可删除；接管时原 Chrome 数据保存于 `User Data.account0.bak`，一键可还原。
 
 ## 红线（实现与后续改动都必须遵守）
 
