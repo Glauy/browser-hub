@@ -75,13 +75,18 @@ if (lastMessage === "chore: prepare public branch") {
   git('commit -m "chore: prepare public branch"');
 }
 
-// 6. back to internal (restores docs/, internal README and README.public.md)
+// 6. push. main is regenerated from internal every sync (reset --hard +
+//    amended prepare commit), so the remote must be force-updated when the
+//    amended hash diverges from a previously pushed main. --force-with-lease
+//    refuses if someone else pushed in between. Sole-maintainer branch.
+if (shouldPush) {
+  sh("git push -u origin main --force-with-lease");
+  console.log("pushed origin main (force-with-lease).");
+} else {
+  console.log("review with: git checkout main; then push with --force-with-lease.");
+}
+
+// 7. back to internal (restores docs/, internal README and README.public.md)
 git("checkout internal");
 
 console.log("\nmain is ready: docs/vibe coding stripped, public README installed.");
-if (shouldPush) {
-  sh("git push -u origin main");
-  console.log("pushed origin main.");
-} else {
-  console.log("review with: git checkout main; then push: git push -u origin main");
-}
