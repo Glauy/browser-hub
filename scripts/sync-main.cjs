@@ -49,7 +49,7 @@ git("checkout main");
 git("merge --ff-only internal");
 
 // 2. strip internal-only content
-const strip = ["docs", "vibe coding.md"];
+const strip = ["docs", "vibe coding.md", "README.public.md"];
 for (const item of strip) {
   const tracked = git(`ls-files "${item}"`, { quiet: true }).trim();
   if (tracked) {
