@@ -11,6 +11,7 @@ Chrome 浏览器环境管理器（Windows 桌面应用）。一个环境 = 一�
 | [docs/architecture.md](docs/architecture.md) | 目录结构、前后端边界、IPC 约定 |
 | [docs/data-and-safety.md](docs/data-and-safety.md) | 数据存放位置、进程检测、破坏性操作守则 |
 | [docs/user-data-forms.md](docs/user-data-forms.md) | env_default（系统默认）与 env_*（环境）两种形态、接管机制 |
+| [docs/debug-log-tray-verification.md](docs/debug-log-tray-verification.md) | 调试实录：托盘隐藏验证的 5 个坑与日志实证法 |
 | [docs/development.md](docs/development.md) | 构建/运行/打包命令与离线依赖说明 |
 | [docs/bundle-size.md](docs/bundle-size.md) | 产物体积实测、归因与回归警戒线 |
 | [docs/app-data-vs-webview.md](docs/app-data-vs-webview.md) | 应用数据与 WebView 缓存的概念区分、业界规范、当前布局依据 |
