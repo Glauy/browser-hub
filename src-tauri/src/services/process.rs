@@ -9,10 +9,12 @@ use windows_sys::Win32::System::Diagnostics::ToolHelp::{
     TH32CS_SNAPPROCESS,
 };
 use windows_sys::Win32::System::Threading::{
-    GetProcessTimes, OpenProcess, QueryFullProcessImageNameW, PROCESS_QUERY_LIMITED_INFORMATION,
+    GetProcessTimes, OpenProcess, QueryFullProcessImageNameW, TerminateProcess,
+    WaitForSingleObject, PROCESS_QUERY_LIMITED_INFORMATION, PROCESS_TERMINATE,
 };
 
 const PROCESS_COMMAND_LINE_INFORMATION: u32 = 60;
+const SYNCHRONIZE_ACCESS: u32 = 0x0010_0000;
 
 #[repr(C)]
 struct UnicodeString {
@@ -265,6 +267,71 @@ pub fn scan_chrome_processes() -> Result<Vec<ChromeProcess>, String> {
 
 fn same_directory(left: &str, right: &str) -> bool {
     normalized_key(Path::new(left)) == normalized_key(Path::new(right))
+}
+
+/// Kills WebView2 processes that still reference BrowserHub's WebView2 user
+/// data directory. Called at startup, after the single-instance mutex is held:
+/// at that point any such process is an orphan from a crashed/killed instance
+/// (a frozen WebView2 browser process does not exit when its host dies) and
+/// would keep the user data directory locked, blocking the new WebView2.
+///
+/// Only `msedgewebview2.exe` is ever touched; `chrome.exe` cannot match.
+pub fn terminate_webview_processes(webview_data_dir: &Path) -> usize {
+    let needle = webview_data_dir.to_string_lossy().to_ascii_lowercase();
+    let snapshot = unsafe { CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0) };
+    if snapshot.is_null() || snapshot == windows_sys::Win32::Foundation::INVALID_HANDLE_VALUE {
+        return 0;
+    }
+
+    let mut entries: Vec<PROCESSENTRY32W> = Vec::new();
+    let mut entry: PROCESSENTRY32W = unsafe { std::mem::zeroed() };
+    entry.dwSize = std::mem::size_of::<PROCESSENTRY32W>() as u32;
+    let mut has_entry = unsafe { Process32FirstW(snapshot, &mut entry) } != 0;
+    while has_entry {
+        entries.push(entry);
+        entry = unsafe { std::mem::zeroed() };
+        entry.dwSize = std::mem::size_of::<PROCESSENTRY32W>() as u32;
+        has_entry = unsafe { Process32NextW(snapshot, &mut entry) } != 0;
+    }
+    unsafe {
+        CloseHandle(snapshot);
+    }
+
+    let mut terminated = 0usize;
+    for entry in entries {
+        let name = crate::services::platform::from_wide_buffer(&entry.szExeFile);
+        if !name.eq_ignore_ascii_case("msedgewebview2.exe") || entry.th32ProcessID == 0 {
+            continue;
+        }
+        let pid = entry.th32ProcessID;
+        let handle = unsafe {
+            OpenProcess(
+                PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_TERMINATE | SYNCHRONIZE_ACCESS,
+                0,
+                pid,
+            )
+        };
+        if handle.is_null() {
+            continue;
+        }
+        let matches = query_command_line(handle)
+            .map(|line| {
+                let lower = line.to_ascii_lowercase();
+                lower.contains(&needle) || lower.contains("--webview-exe-name=browserhub.exe")
+            })
+            .unwrap_or(false);
+        if matches && unsafe { TerminateProcess(handle, 1) } != 0 {
+            unsafe {
+                WaitForSingleObject(handle, 2_000);
+            }
+            terminated += 1;
+            log::warn!("terminated orphaned WebView2 process pid {pid}");
+        }
+        unsafe {
+            CloseHandle(handle);
+        }
+    }
+    terminated
 }
 
 fn reliable_status(

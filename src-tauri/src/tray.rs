@@ -4,15 +4,17 @@ use tauri::AppHandle;
 
 pub fn setup(app: &AppHandle) -> tauri::Result<()> {
     let open = MenuItem::with_id(app, "open", "打开 BrowserHub", true, None::<&str>)?;
+    let restart = MenuItem::with_id(app, "restart", "重新启动 BrowserHub", true, None::<&str>)?;
     let exit = MenuItem::with_id(app, "exit", "退出 BrowserHub", true, None::<&str>)?;
-    let menu = Menu::with_items(app, &[&open, &exit])?;
+    let menu = Menu::with_items(app, &[&open, &restart, &exit])?;
 
     let mut builder = TrayIconBuilder::with_id("browserhub-tray")
-        .tooltip("BrowserHub - Chrome 环境管理器\n左键：显示窗口\n右键：打开/退出")
+        .tooltip("BrowserHub - Chrome 环境管理器\n左键：显示窗口\n右键：打开/重启/退出")
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| match event.id().as_ref() {
             "open" => crate::window::show_main_window(app),
+            "restart" => crate::window::restart_application(app),
             "exit" => crate::window::exit_application(app),
             _ => {}
         })

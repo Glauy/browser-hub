@@ -15,12 +15,19 @@ use tauri::{Manager, RunEvent, WebviewWindowBuilder};
 
 fn initialize(app: &tauri::AppHandle) -> Result<(), Box<dyn std::error::Error>> {
     create_main_window(app)?;
+    if let Some(window) = window::main_window(app) {
+        window::remember_main_hwnd(&window);
+    }
+    // Start the watchdog before any window operation: if the webview is already
+    // wedged, a blocking ShowWindow/SetWindowPos must still have an escape hatch.
+    window::spawn_watchdog();
     if let Err(error) = window::restore_state(app) {
         log::warn!("could not restore window state: {error}");
     }
     window::install_close_handler(app);
     tray::setup(app)?;
-    window::show_main_window(app);
+    window::show_main_window_at_startup(app);
+    platform::spawn_activation_listener(app.clone());
     Ok(())
 }
 
@@ -41,7 +48,15 @@ fn create_main_window(app: &tauri::AppHandle) -> Result<(), Box<dyn std::error::
 }
 
 pub fn run() {
-    if !platform::acquire_single_instance() {
+    if platform::is_relaunch_request() {
+        // A relaunch happens while the previous process is still unwinding;
+        // wait for the single-instance mutex instead of treating it as a
+        // duplicate launch.
+        if !platform::acquire_single_instance_wait(std::time::Duration::from_secs(10)) {
+            log::warn!("relaunch could not acquire the single-instance mutex");
+            return;
+        }
+    } else if !platform::acquire_single_instance() {
         platform::focus_existing_window();
         return;
     }
@@ -77,6 +92,15 @@ pub fn run() {
             return;
         }
     };
+
+    // A frozen WebView2 browser process survives its host and keeps the
+    // WebView2 user data directory locked; the next WebView2 creation would
+    // then block forever. The single-instance mutex is already held here, so any
+    // msedgewebview2.exe still pointing at our directory is an orphan.
+    let cleaned = crate::services::process::terminate_webview_processes(&state.paths.webview_data_dir);
+    if cleaned > 0 {
+        log::warn!("cleaned up {cleaned} orphaned WebView2 process(es)");
+    }
 
     let builder = tauri::Builder::default()
         .manage(state)

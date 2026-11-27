@@ -99,12 +99,13 @@
 崩溃并留下同样冻结的进程，说明这是本机的系统级重复故障（内存压力：16GB 物理 /
 27GB 提交），不是 BrowserHub 独有。
 
-### 2026-11-27　故障定位与文档沉淀
+### 2026-11-27　故障定位、修复与文档沉淀
 
 | 时间 | 事件 |
 | --- | --- |
 | 08:32 | 只读取证：主线程 `NtUserShowWindow(SW_SHOW)`；WebView2 子窗口 2s 超时；52/52 Suspended |
 | 08:xx | WER `AppSessionGuid` 反解确认崩溃实例 = pid 32148 |
+| 09:00–09:25 | 实现并实测加固：显示前健康检查、僵尸自动重启、单实例命名事件、启动清理孤儿 WebView2、看门狗、托盘重启/退出 |
 | 同日 | 新增 `docs/debug-log-webview2-zombie-freeze.md`、`docs/timeline.md`、`docs/changelog.md` |
 
 ## 版本与分支节奏

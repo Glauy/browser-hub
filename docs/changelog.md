@@ -6,21 +6,26 @@
 
 ## [Unreleased]
 
+### 修复
+
+- **WebView2 僵尸进程导致应用"点不开"**（0.1.0 已知问题）：
+  - 显示/隐藏/最小化/最大化/关闭前做 WebView2 健康检查，避免进入会永久阻塞的
+    同步 `ShowWindow` 路径。
+  - 通过线程挂起计数识别确定的僵尸（WER 冻结的 WebView2），**自动重启恢复**，
+    用户无需操作；无法确定的无响应才弹恢复对话框。
+  - 单实例激活改为命名事件 + 后台监听，不再从第二个进程调用 `ShowWindow`，
+    避免第二个进程一起卡死。
+  - 启动时清理仍占用本产品 WebView2 用户数据目录的孤儿 `msedgewebview2.exe`，
+    避免新 WebView2 初始化被目录锁阻塞。
+  - 新增后台看门狗：UI 线程死锁时仍可弹窗重启/退出。
+  - 托盘新增“重新启动 BrowserHub”；“退出”不再经过窗口销毁，WebView2 死亡时也能关。
+  - 实测记录见 [debug-log-webview2-zombie-freeze.md](debug-log-webview2-zombie-freeze.md)。
+
 ### 新增（文档）
 
 - `docs/timeline.md`：从 0 到 0.1.0 的阶段时间线、每次架构修正的原因。
 - `docs/debug-log-webview2-zombie-freeze.md`：WebView2 僵尸进程故障的完整取证与
-  加固待办。
-
-### 已知问题（未修复）
-
-- **WebView2 崩溃后应用"点不开"**：`msedgewebview2.exe` 因 OOM（`0xE0000008`）
-  崩溃后，WER 只冻结、不终止进程，留下全线程 `Suspended` 的僵尸。此后
-  `show_main_window()` 的同步 `ShowWindow(SW_SHOW)` 会永久阻塞，托盘、关闭、
-  单实例激活全部失效；重启 exe 也会卡在同一步。
-  - 影响版本：0.1.0
-  - 临时恢复：结束 `browserhub.exe` 后重启（不影响 Chrome 环境）
-  - 详见：[debug-log-webview2-zombie-freeze.md](debug-log-webview2-zombie-freeze.md)
+  加固实现记录。
 
 ## [0.1.0] - 2026-11-15
 

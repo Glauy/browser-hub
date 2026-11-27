@@ -1,6 +1,7 @@
 # 调试实录：WebView2 僵尸进程导致应用"点不开"（2026-11-27）
 
-> 状态：**根因已定位，未修复**。本文只记录事实与证据，供后续加固设计使用。
+> 状态：**根因已定位；修复已实现并通过实测（2026-11-27），待发布**。
+> 本文保留完整的取证过程与证据，供后续加固设计参考。
 > 相关代码：`src-tauri/src/window.rs`（`show_main_window` / `request_close`）、
 > `src-tauri/src/services/platform.rs`（`focus_existing_window`）、`src-tauri/src/lib.rs`（启动流程）。
 
@@ -137,20 +138,38 @@ win32k：显示窗口 → 逐个通知子窗口（跨进程同步消息）
 - **高内存压力是背景条件**：16GB 物理内存 / 27GB 提交，11-22–11-25 三个
   Chromium 系进程先后 OOM，说明这不是单次偶发。
 
-## 待办（尚未实施，供优化排期）
+## 修复实现（2026-11-27，已验证，待发布）
 
-1. `show_main_window` 与单实例激活改用 `ShowWindowAsync`（或 `SetWindowPos` +
-   `SWP_ASYNCWINDOWPOS`），避免 UI 线程被跨进程通知永久阻塞。
-2. 监听 WebView2 `ProcessFailed`（wry 层）→ 在 UI 上明确提示"渲染进程已崩溃"，
-   并提供重启入口，而不是静默失效。
-3. 托盘"退出"走独立通道（后台看门狗线程 + 心跳），保证 UI 线程被阻塞时仍可退出。
-4. 启动时/显示前自检：若 WebView2 子窗口所属线程 `Suspended`，直接判定渲染层
-   不可用，重建窗口而不是 `ShowWindow`。
-5. 单实例激活增加超时：`ShowWindowAsync` 后等待窗口可见，超时则提示
-   "已有实例无响应，请在任务管理器中结束"。
-6. 评估 WebView2 崩溃后的自动恢复方案（销毁并重建 WebView2 环境/窗口）。
+| 问题 | 实现 |
+| --- | --- |
+| 显示/隐藏窗口会卡死 | `window::ensure_webview_responsive`：所有会同步通知子窗口的操作（show / hide / minimize / maximize / close）先做健康检查 |
+| 已崩溃的 WebView2 判定 | `webview_health::is_webview_suspended`：探测 `Chrome_WidgetWin_1` 所属线程的挂起计数；非 0 = 确定的僵尸（BrowserHub 自己从不挂起 WebView2） |
+| 僵尸自动恢复 | 检测到 Suspended → **不弹窗，直接自动重启**（`relaunch_now`），用户看到的是窗口正常打开 |
+| 无法确定的无响应 | `webview_health::is_webview_responsive`：1.2s 消息探测；超时但未 Suspended 才弹“重启 / 退出 / 取消” |
+| 单实例激活不再阻塞 | 改为命名事件 + 后台监听线程 → `run_on_main_thread` 走统一的受保护 show 路径；不再从第二个进程调用 `ShowWindow` |
+| 崩溃进程残留 | `process::terminate_webview_processes`：启动时（已持有单实例互斥锁）清理仍指向本产品 WebView2 UDF 的孤儿 `msedgewebview2.exe`，避免新 WebView2 被目录锁卡死 |
+| UI 线程死锁逃生 | `window::spawn_watchdog`：后台线程只用原始 Win32；UI 无响应且 WebView2 已死约 30s（WebView2 仍活则 90s）时弹出“重启 / 退出 / 取消” |
+| 托盘无法关闭 | 托盘新增“重新启动 BrowserHub”；“退出”改为 `std::process::exit`，不经过窗口销毁 |
 
-## 临时恢复（不改代码）
+### 本轮实测（真实桌面端）
+
+| 场景 | 结果 |
+| --- | --- |
+| 正常启动 / 显示 | ✅ 窗口可见，WebView2 子窗口正常 |
+| `WM_CLOSE`（closeBehavior=minimize） | ✅ 隐藏到托盘，进程存活 |
+| 第二实例激活已隐藏窗口 | ✅ 命名事件恢复窗口，只有一个进程 |
+| WebView2 被挂起后启动第二实例 | ✅ **无弹窗自动重启**，旧进程结束，新窗口可见 |
+| 启动前清理孤儿 WebView2 | ✅ 日志 `cleaned up 2 orphaned WebView2 process(es)` |
+| 看门狗：渲染进程死亡 | ✅ 约 12s 弹窗；“退出”可用 |
+| Chrome 环境 | ✅ 全程未受影响 |
+
+### 仍待办
+
+- wry 0.57 未暴露 `ProcessFailed`，目前依靠线程状态/消息探测；升级 wry 后可改为事件驱动。
+- 未实现“原地重建 WebView2”，恢复方式为进程级重启（对用户是无感的，Chrome 不受影响）。
+- 版本号与发布包待定（当前仍是 0.1.0）。
+
+## 临时恢复（旧版本，不改代码）
 
 结束 `browserhub.exe` 后重新启动即可（**不会影响任何 Chrome 环境**，这是产品设计
 约束）。僵尸 `msedgewebview2.exe` 会随父进程退出被系统回收；若未回收，再结束对应

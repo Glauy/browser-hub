@@ -31,11 +31,24 @@
 
 ✅ 环境/备份/设置/新建/引导页渲染与交互（Playwright 截图，存于 `.screenshots/`，脚本见 `scripts/README.md`）。
 
+## WebView2 崩溃恢复（2026-11-27，真实桌面端）
+
+| 项 | 结果 | 依据 |
+| --- | --- | --- |
+| 显示/隐藏/最小化/最大化前健康检查 | ✅ 僵尸状态下不再进入 `ShowWindow` | 代码 + 实测 |
+| 僵尸识别（线程挂起计数） | ✅ `Chrome_WidgetWin_1` 线程 Suspended 判定 | 实测 |
+| 僵尸自动重启 | ✅ 无弹窗，旧进程结束、新窗口可见 | 实测 |
+| 单实例激活（命名事件） | ✅ 窗口恢复，仅一个进程 | 实测 |
+| 启动清理孤儿 WebView2 | ✅ `cleaned up 2 orphaned WebView2 process(es)` | 日志 |
+| 看门狗（渲染进程死亡） | ✅ 约 12s 弹窗，可退出 | 实测 |
+| 托盘重启/退出 | ✅ 退出不经过窗口销毁 | 代码 + 实测 |
+| Chrome 环境不受影响 | ✅ 全程存活 | 进程对比 |
+
 ## 未完成 / 已知限制
 
-- **已知故障（0.1.0）**：WebView2 进程 OOM 崩溃后可能被 WER 冻结成僵尸，导致
-  `ShowWindow` 永久阻塞、应用"点不开"。取证与加固待办见
-  [debug-log-webview2-zombie-freeze.md](debug-log-webview2-zombie-freeze.md)。
+- WebView2 僵尸故障已在未发布版本中加固（见
+  [debug-log-webview2-zombie-freeze.md](debug-log-webview2-zombie-freeze.md)）；
+  wry 0.57 未暴露 `ProcessFailed`，当前依靠线程状态/消息探测。
 - 未覆盖：多环境并发检测、`unknown` 状态实际触发路径、自启开关注册表实测、
   托管/还原按钮的 UI 自动化点击验证（后端逻辑已手动等价验证；UI 层因桌面自动化
   焦点问题未走通，需人工点一次确认）。
