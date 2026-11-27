@@ -17,27 +17,31 @@ Chrome 浏览器环境——多 Google 账号、工作/生活分离、客户账�
 - **系统默认 Chrome 托管**（可选）：将桌面 Chrome 图标指向独立管理的
   `env_default` 目录，与各环境并行共存；原数据自动备份、一键还原
 - **备份与恢复**：完整目录副本，恢复前强制确认；备份目录可自定义
-- **桌面体验**：系统托盘、可配置关闭行为（退出/最小化）、开机自启、
+- **崩溃自愈**：WebView2 渲染进程崩溃或被系统挂起时自动重启恢复，
+  窗口不会永久卡死；Chrome 环境不受影响
+- **桌面体验**：系统托盘、可配置关闭行为（隐藏到托盘 / 退出）、开机自启、
   单实例保护；关闭 BrowserHub 不影响已启动的 Chrome
 
 ## 下载
 
-从 `release/v<版本>/` 获取（见各 Release）：
+从 [GitHub Releases](https://github.com/Glauy/browser-hub/releases) 下载：
 
 | 文件 | 说明 |
 | --- | --- |
 | `BrowserHub_<版本>_x64-setup.exe` | 安装版（当前用户，免管理员，含卸载器） |
 | `BrowserHub_<版本>_x64-portable.exe` | 便携单文件，双击即用 |
 
-系统要求：Windows 10/11（WebView2 由系统提供）。
+平台支持：**Windows 10/11 x64**（WebView2 由系统提供）。
+macOS / Linux 暂不支持（后端使用 Win32 API）。
 
 ## 数据安全承诺
 
 - **本地优先**：无账号体系、无上传、无遥测。所有数据只存放在本机
 - **元数据隔离**：SQLite 仅保存环境名称、路径等管理信息；
   **绝不读取** Cookies、密码或任何浏览内容
-- **程序与数据分离**：程序装在 `%LOCALAPPDATA%\Programs\BrowserHub`，
-  数据在 `%LOCALAPPDATA%\forga.space\BrowserHub`，卸载默认保留数据
+- **程序与数据分离**：程序默认装在 `%LOCALAPPDATA%\Programs\BrowserHub`
+  （安装时可选目录），数据在 `%LOCALAPPDATA%\forga.space\BrowserHub`，
+  卸载默认保留数据
 - **破坏性操作多重防护**：运行中/状态不明拒绝删除；符号链接拒判；
   系统目录保护；完整路径 + 二次确认
 
