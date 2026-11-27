@@ -43,6 +43,9 @@ cd src-tauri; cargo check --offline
   数据固定在 `%LOCALAPPDATA%\forga.space\BrowserHub`，卸载默认不删数据（勾选"删除应用数据"才删）。
   通过自定义 NSIS 模板 + 安装钩子实现，升级 tauri-cli 时需同步官方模板。
 - 安装版启动实测：窗口正常、读取同一份数据。
+- 安装器图标：`bundle.windows.nsis.installerIcon` / `uninstallerIcon` 指向
+  `icons/icon.ico`；该 ICO 为 16/24/32/48/64/128/256 多尺寸（由 `icons/icon.png`
+  生成），避免 NSIS 默认的蓝色图标。
 - 注意：构建/安装前需先关闭正在运行的 BrowserHub（release exe 被占用会导致编译失败）。
 
 ## 版本号与发布目录

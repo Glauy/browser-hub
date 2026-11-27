@@ -257,7 +257,6 @@ Function PageReinstall
     !insertmacro MUI_HEADER_TEXT "$(alreadyInstalled)" "$(chooseMaintenanceOption)"
   ; Upgrading
   ${ElseIf} $R0 = 1
-    StrCpy $R1 "$(olderOrUnknownVersionInstalled)"
     StrCpy $R2 "$(uninstallBeforeInstalling)"
     StrCpy $R3 "$(dontUninstall)"
     !insertmacro MUI_HEADER_TEXT "$(alreadyInstalled)" "$R5"
@@ -287,6 +286,20 @@ Function PageReinstall
     nsDialogs::Create 1018
     Pop $R4
     ${IfThen} $(^RTL) = 1 ${|} nsDialogs::SetRTL $(^RTL) ${|}
+
+    ; BrowserHub: fixed upgrade message. The upstream template reads its text
+    ; from $R4, which can carry a stale/unrelated version; set it here (after
+    ; MUI_HEADER_TEXT) so it cannot be clobbered before the label is created.
+    ${If} $R0 = 1
+      ; NOTE: ${LANG_SIMPCHINESE} is not defined yet at this point in the
+      ; template (MUI_LANGUAGE is inserted at the bottom), so use the numeric
+      ; language id directly.
+      ${If} $LANGUAGE == 2052
+        StrCpy $R1 "系统中已存在旧版本或未知版本的 ${PRODUCTNAME}。推荐先卸载当前版本后再进行安装。"
+      ${Else}
+        StrCpy $R1 "An older or unknown version of ${PRODUCTNAME} is already installed. It is recommended to uninstall it first."
+      ${EndIf}
+    ${EndIf}
 
     ${NSD_CreateLabel} 0 0 100% 24u $R1
     Pop $R1
@@ -476,7 +489,12 @@ Function un.ConfirmShow ; Add add a `Delete app data` check box
   IntOp $5 $5 / 96
   IntOp $6 $6 / 96
   IntOp $7 $7 / 96
-  System::Call 'user32::CreateWindowEx(i r3, w "${__NSD_CheckBox_CLASS}", w "$(deleteAppData)", i ${__NSD_CheckBox_STYLE}, i r4, i r5, i r6, i r7, p r1, i0, i0, i0) i .s'
+  ${If} $LANGUAGE == 2052
+    StrCpy $R9 "同时删除 BrowserHub 元数据与缓存（不影响 Chrome 环境）"
+  ${Else}
+    StrCpy $R9 "Also delete BrowserHub metadata and cache (Chrome environments are kept)"
+  ${EndIf}
+  System::Call 'user32::CreateWindowEx(i r3, w "${__NSD_CheckBox_CLASS}", w "$R9", i ${__NSD_CheckBox_STYLE}, i r4, i r5, i r6, i r7, p r1, i0, i0, i0) i .s'
   Pop $DeleteAppDataCheckbox
   SendMessage $HWNDPARENT ${WM_GETFONT} 0 0 $1
   SendMessage $DeleteAppDataCheckbox ${WM_SETFONT} $1 1

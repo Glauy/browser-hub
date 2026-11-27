@@ -49,6 +49,8 @@
         "installMode": "currentUser",
         "displayLanguageSelector": false,
         "languages": ["SimpChinese", "English"],
+        "installerIcon": "icons/icon.ico",
+        "uninstallerIcon": "icons/icon.ico",
         "template": "installer/installer.nsi",
         "installerHooks": "installer/hooks.nsh"
       }
