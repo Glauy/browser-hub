@@ -33,6 +33,9 @@
 
 ## 未完成 / 已知限制
 
+- **已知故障（0.1.0）**：WebView2 进程 OOM 崩溃后可能被 WER 冻结成僵尸，导致
+  `ShowWindow` 永久阻塞、应用"点不开"。取证与加固待办见
+  [debug-log-webview2-zombie-freeze.md](debug-log-webview2-zombie-freeze.md)。
 - 未覆盖：多环境并发检测、`unknown` 状态实际触发路径、自启开关注册表实测、
   托管/还原按钮的 UI 自动化点击验证（后端逻辑已手动等价验证；UI 层因桌面自动化
   焦点问题未走通，需人工点一次确认）。

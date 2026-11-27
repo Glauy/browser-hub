@@ -52,3 +52,6 @@
 宿主 IDE 窗口覆盖、窗口状态漂移（最大化记住）、无边框窗口隐形边框导致
 坐标偏移。**后端行为验证请优先用日志实证法**（TEMP-DEBUG 模式，见该文档），
 点击自动化仅用于"确认页面能打开"级别的粗验证。
+
+跨进程窗口/线程级取证（窗口探针、RIP 参数、WER 报告反查）见
+[debug-log-webview2-zombie-freeze.md](../docs/debug-log-webview2-zombie-freeze.md)。
