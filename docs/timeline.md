@@ -1,6 +1,6 @@
 # 项目时间线
 
-> 目的：按时间还原 BrowserHub 从 0 到 0.1.0 的过程、每次架构修正的原因，以及
+> 目的：按时间还原 BrowserHub 从 0 到 0.1.1 的过程、每次架构修正的原因，以及
 > 真实使用后发生的第一个线上级故障。与 `changelog.md`（版本视角）互补：
 > 本文回答"为什么变成现在这样"，changelog 回答"每个版本有什么"。
 >
@@ -17,7 +17,7 @@
 | 2026-11-15 上午 | 隐藏到托盘 + 首次发布 | 关闭/最小化统一隐藏；`release/v0.1.0`；GitHub main |
 | 2026-11-15 → 11-20 | 真实使用 | 多环境日常启动，未改代码 |
 | 2026-11-22 | **首次线上级故障** | WebView2 OOM 崩溃 → WER 冻结 → 应用"点不开" |
-| 2026-11-27 | 故障定位与文档沉淀 | 定位 `ShowWindow` 阻塞链；补 timeline/changelog |
+| 2026-11-27 | 故障定位、修复与 0.1.1 打包 | 定位 `ShowWindow` 阻塞链；加固并实测；托盘菜单重构 |
 
 ## 详细
 
@@ -106,11 +106,14 @@
 | 08:32 | 只读取证：主线程 `NtUserShowWindow(SW_SHOW)`；WebView2 子窗口 2s 超时；52/52 Suspended |
 | 08:xx | WER `AppSessionGuid` 反解确认崩溃实例 = pid 32148 |
 | 09:00–09:25 | 实现并实测加固：显示前健康检查、僵尸自动重启、单实例命名事件、启动清理孤儿 WebView2、看门狗、托盘重启/退出 |
+| 09:29 | **0.1.1**：托盘菜单重构（去重产品名、分隔线、默认项加粗、tooltip）；版本号三处同步 |
+| 09:40 | `npm run dist` 产出 `release/v0.1.1/`（**只打包，未安装、未改动安装目录**） |
 | 同日 | 新增 `docs/debug-log-webview2-zombie-freeze.md`、`docs/timeline.md`、`docs/changelog.md` |
 
 ## 版本与分支节奏
 
-- **版本**：当前 `0.1.0`，未打 git tag；发布产物在 `release/v0.1.0/`。
+- **版本**：当前 `0.1.1`，未打 git tag；发布产物在 `release/v0.1.1/`
+  （0.1.0 的产物仍在 `release/v0.1.0/`）。
 - **分支**：`internal` 是唯一工作分支（含 docs、`vibe coding.md`、`README.public.md`），
   **永不 push**；`main` 每次由 `npm run sync-main` 从 internal 重建并裁剪，
   通过 `--force-with-lease` 推送。

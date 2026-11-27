@@ -252,7 +252,7 @@ function buildBootstrap(): BootstrapState {
         recommended: false,
       },
     ],
-    appVersion: "0.1.0",
+    appVersion: "0.1.1",
     appDataDir: "C:\\Users\\glauy\\AppData\\Local\\forga.space\\BrowserHub",
     installDir: "C:\\Users\\glauy\\AppData\\Local\\Programs\\BrowserHub",
   };

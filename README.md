@@ -8,7 +8,7 @@ Chrome 浏览器环境管理器（Windows 桌面应用）。一个环境 = 一�
 
 | 文档 | 内容 |
 | --- | --- |
-| [docs/changelog.md](docs/changelog.md) | 版本变更日志（0.1.0 + Unreleased/已知问题） |
+| [docs/changelog.md](docs/changelog.md) | 版本变更日志（0.1.1） |
 | [docs/timeline.md](docs/timeline.md) | 项目时间线：阶段、架构修正原因、首次线上级故障 |
 | [docs/architecture.md](docs/architecture.md) | 目录结构、前后端边界、IPC 约定 |
 | [docs/data-and-safety.md](docs/data-and-safety.md) | 数据存放位置、进程检测、破坏性操作守则 |

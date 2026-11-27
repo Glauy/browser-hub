@@ -2,9 +2,11 @@
 
 版本号遵循 [SemVer](https://semver.org/lang/zh-CN/)；格式参考
 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
-当前版本 **0.1.0**（尚未打 git tag，发布产物见 `release/v<版本>/`）。
+当前版本 **0.1.1**（尚未打 git tag，发布产物见 `release/v<版本>/`）。
 
 ## [Unreleased]
+
+## [0.1.1] - 2026-11-27
 
 ### 修复
 
@@ -21,9 +23,16 @@
   - 托盘新增“重新启动 BrowserHub”；“退出”不再经过窗口销毁，WebView2 死亡时也能关。
   - 实测记录见 [debug-log-webview2-zombie-freeze.md](debug-log-webview2-zombie-freeze.md)。
 
+### 变更
+
+- 托盘右键菜单重构：去掉每行重复的 “BrowserHub”，改为
+  「打开主窗口 / 重新启动 / 退出」+ 分隔线；Windows 原生默认项（首行）加粗；
+  tooltip 改为“左键打开主窗口，右键更多操作”。
+- 版本号升至 0.1.1；发布产物输出到 `release/v0.1.1/`，不覆盖 0.1.0。
+
 ### 新增（文档）
 
-- `docs/timeline.md`：从 0 到 0.1.0 的阶段时间线、每次架构修正的原因。
+- `docs/timeline.md`：从 0 到 0.1.1 的阶段时间线、每次架构修正的原因。
 - `docs/debug-log-webview2-zombie-freeze.md`：WebView2 僵尸进程故障的完整取证与
   加固实现记录。
 

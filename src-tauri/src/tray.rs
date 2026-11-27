@@ -1,15 +1,32 @@
-use tauri::menu::{Menu, MenuItem};
+use tauri::menu::{ContextMenu, Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::AppHandle;
 
 pub fn setup(app: &AppHandle) -> tauri::Result<()> {
-    let open = MenuItem::with_id(app, "open", "打开 BrowserHub", true, None::<&str>)?;
-    let restart = MenuItem::with_id(app, "restart", "重新启动 BrowserHub", true, None::<&str>)?;
-    let exit = MenuItem::with_id(app, "exit", "退出 BrowserHub", true, None::<&str>)?;
-    let menu = Menu::with_items(app, &[&open, &restart, &exit])?;
+    // Concise labels: the product name is already on the icon/tooltip; repeating
+    // it on every row reads like a debug menu.
+    let open = MenuItem::with_id(app, "open", "打开主窗口", true, None::<&str>)?;
+    let restart = MenuItem::with_id(app, "restart", "重新启动", true, None::<&str>)?;
+    let exit = MenuItem::with_id(app, "exit", "退出", true, None::<&str>)?;
+
+    // One separator groups the primary action apart from maintenance/exit.
+    let separator = PredefinedMenuItem::separator(app)?;
+    let menu = Menu::with_items(app, &[&open, &separator, &restart, &exit])?;
+
+    // Windows convention: the default item is drawn bold. Mark "open" (the
+    // first row) as the default so the menu has a clear primary action.
+    #[cfg(windows)]
+    {
+        use windows_sys::Win32::UI::WindowsAndMessaging::SetMenuDefaultItem;
+        if let Ok(hmenu) = menu.hpopupmenu() {
+            unsafe {
+                SetMenuDefaultItem(hmenu as usize as *mut core::ffi::c_void, 0, 1);
+            }
+        }
+    }
 
     let mut builder = TrayIconBuilder::with_id("browserhub-tray")
-        .tooltip("BrowserHub - Chrome 环境管理器\n左键：显示窗口\n右键：打开/重启/退出")
+        .tooltip("BrowserHub · Chrome 环境管理器\n左键打开主窗口　右键更多操作")
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| match event.id().as_ref() {

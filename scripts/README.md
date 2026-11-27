@@ -45,6 +45,30 @@
 | --- | --- | --- |
 | `release-collect.cjs` | 收集 tauri build 产物到 `release/v<版本>/`（安装版+便携版），生成含 SHA256 的 `RELEASE.md` | `npm run dist`（构建+收集）或 `node scripts/release-collect.cjs`（仅收集） |
 
+### 发布纪律（重要）
+
+- `npm run dist` **只构建并收集产物**，不安装、不复制到任何安装目录。
+  `release/v<版本>/` 是唯一输出位置；安装由人工执行 `setup.exe`。
+- 升版本时同步改三处：`package.json`、`src-tauri/Cargo.toml`、
+  `src-tauri/tauri.conf.json`（`Cargo.lock` 随构建自动更新），
+  再执行 `npm run dist`。**不要复用旧版本号**，否则会覆盖既有发布包。
+- 安装前先结束运行中的 BrowserHub（release exe 被占用会报
+  `拒绝访问 (os error 5)`）；结束 BrowserHub 不影响任何 Chrome 环境。
+
+### 若 NSIS 打包报 `os error 32`
+
+`npm run dist` 在 `Running makensis` 之后报
+`另一个程序正在使用此文件 (os error 32)`，通常是杀毒软件正在扫描刚生成的
+安装包导致的瞬时文件锁。可稍后重试；或手动兜底：
+
+```powershell
+cd src-tauri\target\release\nsis\x64
+& "$env:LOCALAPPDATA\tauri\NSIS\makensis.exe" installer.nsi
+Copy-Item nsis-output.exe ..\..\bundle\nsis\BrowserHub_<版本>_x64-setup.exe -Force
+cd <repo>
+node scripts/release-collect.cjs
+```
+
 ## 已知局限：UI 点击自动化不可靠
 
 `dev-window-capture.ps1` 的点击功能受三个因素干扰（详见

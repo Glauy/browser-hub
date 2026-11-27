@@ -1,6 +1,6 @@
 [package]
 name = "browserhub"
-version = "0.1.0"
+version = "0.1.1"
 description = "BrowserHub - Chrome browser environment manager"
 authors = ["BrowserHub"]
 edition = "2021"

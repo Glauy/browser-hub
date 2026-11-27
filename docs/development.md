@@ -44,3 +44,19 @@ cd src-tauri; cargo check --offline
   通过自定义 NSIS 模板 + 安装钩子实现，升级 tauri-cli 时需同步官方模板。
 - 安装版启动实测：窗口正常、读取同一份数据。
 - 注意：构建/安装前需先关闭正在运行的 BrowserHub（release exe 被占用会导致编译失败）。
+
+## 版本号与发布目录
+
+升版本时同步修改三处（缺一不可）：
+
+1. `package.json` — `version`
+2. `src-tauri/Cargo.toml` — `[package] version`
+3. `src-tauri/tauri.conf.json` — `version`
+
+`src-tauri/Cargo.lock` 与 `package-lock.json` 随构建/`npm version` 更新。
+改完后执行 `npm run dist`，产物在 `release/v<版本>/`；**不要复用旧版本号**
+（否则 `release-collect.cjs` 会覆盖同版本目录）。
+
+**发布纪律**：`npm run dist` 只构建和收集，**不会安装、也不会复制到
+`D:\Tool\BrowserHub` 等安装目录**。安装由人工运行 `setup.exe`；
+结束 BrowserHub 不影响任何 Chrome 环境。
